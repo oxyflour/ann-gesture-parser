@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+<body>
+<div id="u" style="position:absolute;">
+	set as 
+	<button class="btn">patt1</button>
+	<button class="btn">patt2</button>
+	<button class="btn">patt3</button>
+	<button class="btn">patt4</button>
+	<button class="btn">patt5</button>
+	<button class="btn">patt6</button>
+</div>
+<canvas id="c"></canvas>
+<script src="../index.js"></script>
+<script>
+
+var gesture = new AnnGestureParser(),
+	points = [ ]
+
+function onMouseDown(e) {
+	dc.lastPoint = { x:e.pageX, y:e.pageY }
+	dc.clearRect(0, 0, canvas.width, canvas.height)
+
+	points = [ dc.lastPoint ]
+
+	canvas.addEventListener('mousemove', onMouseMove)
+	canvas.addEventListener('mouseup', onMouseUp)
+}
+
+function onMouseMove(e) {
+	dc.beginPath()
+	dc.moveTo(dc.lastPoint.x, dc.lastPoint.y)
+	dc.lineTo(e.pageX, e.pageY)
+	dc.stroke()
+	dc.closePath()
+	dc.lastPoint = { x:e.pageX, y:e.pageY }
+
+	points.push(dc.lastPoint)
+}
+
+function onMouseUp(e) {
+	var pts = interpPoints(resortPoints(points, 5), 20)
+
+	dc.fillStyle = 'rgba(0, 0, 0, 0.5)'
+	dc.beginPath()
+	pts.forEach(function(p, i) {
+		dc.arc(p.x, p.y, 5, 0, 2*Math.PI)
+		dc.fillText(i, p.x, p.y)
+	})
+	dc.closePath()
+	dc.fill()
+
+	console.log('ann output:', gesture.test(points))
+
+	canvas.removeEventListener('mousemove', onMouseMove)
+	canvas.removeEventListener('mouseup', onMouseUp)
+}
+
+var body = document.body
+body.style.margin = body.style.padding = 0
+body.style.overflow = 'hidden'
+
+var canvas = document.getElementById('c')
+canvas.width = window.innerWidth
+canvas.height = window.innerHeight
+canvas.style.background = '#eee'
+canvas.addEventListener('mousedown', onMouseDown)
+
+var dc = canvas.getContext('2d')
+dc.font = '30px Arial'
+dc.strokeStyle = 'rgba(0,128,255,0.5)'
+dc.fillStyle = 'rgba(0, 0, 0, 0.5)'
+dc.lineWidth = 3
+
+Array.prototype.slice.call(document.querySelectorAll('.btn')).forEach((e, i) => {
+	e.addEventListener('click', function(e) {
+		console.log('ann trained', gesture.add(points, 'patt' + (i + 1)))
+	})
+})
+
+</script>
+</body>
+</html>
