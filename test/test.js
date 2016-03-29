@@ -3,12 +3,14 @@ var assert = require('assert'),
 	trainStore = require('./trainStore.json'),
 	testStore = require('./testStore.json')
 
-describe('testing parser (may take a few minutes...)', function() {
+describe('ann parser', function() {
 
 	it('should train the network and pass tests', function() {
-		this.timeout(60000)
 
 		var gesture = new GestureParser()
+
+		this.timeout(120000)
+		console.log('training the network (may take a few minutes...)')
 
 		Object.keys(trainStore).forEach(key => {
 			trainStore[key].forEach(pts => {

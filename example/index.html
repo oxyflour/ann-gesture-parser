@@ -53,7 +53,7 @@ function onMouseUp(e) {
 	dc.closePath()
 	dc.fill()
 
-	console.log('ann output:', gesture.test(points))
+	dc.fillText(gesture.test(points) || 'unknown', 10, canvas.height - 30)
 
 	canvas.removeEventListener('mousemove', onMouseMove)
 	canvas.removeEventListener('mouseup', onMouseUp)
@@ -77,7 +77,7 @@ dc.lineWidth = 3
 
 Array.prototype.slice.call(document.querySelectorAll('.btn')).forEach((e, i) => {
 	e.addEventListener('click', function(e) {
-		console.log('ann trained', gesture.add(points, 'patt' + (i + 1)))
+		console.log('ann trained for', gesture.add(points, 'patt' + (i + 1)))
 	})
 })
 

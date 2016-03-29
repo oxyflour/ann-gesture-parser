@@ -6,20 +6,21 @@ see example/index.html for a live example
 ```javascript
 var gesture = new GestureParser({
 
-	// the ANN has an input layer with 20 input nodes, a hidden layer with 30 nodes and
+	// the ANN has an input layer with 20 nodes, a hidden layer with 30 nodes and
 	// an output layer with 8 nodes
 	sizes: [20, 30, 8],
 
 	// must be between 0 and 1, smaller is slower
-	trainningSpeed: 0.2,
+	trainingSpeed: 0.5,
 
-	// max times in a trainning
-	maxTrainnningTimes: 1e4,
+	// max loops in one training
+	maxTrainingTimes: 1e4,
 
-	// minimal error for trainning
-	minTrainningError: 1e-2,
+	// minimal error to end training
+	minTrainingError: 1e-3,
 
-	// values greater than 0.6 will be 1 and less than 0.4 will be 0
+	// output values greater than (0.5 + threshold) will be 1,
+	// and those less than (0.5 - threshold) will be 0
 	outputThreshold: 0.1,
 })
 

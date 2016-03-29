@@ -114,10 +114,10 @@ function getOutput(weight, bias, input) {
 	return result
 }
 
-function adjustNetwork(weight, bias, input, excepted, speed) {
+function adjustNetwork(weight, bias, input, expected, speed) {
 	var result = getOutput(weight, bias, input),
 		output = result[result.length - 1],
-		delta = excepted.vSub(output),
+		delta = expected.vSub(output),
 		error = output.vMul(output.vAs(1).vSub(output)).vMul(delta)
 	for (var i = weight.length - 1; i >= 0; i --) {
 		output = result[i]
@@ -126,7 +126,7 @@ function adjustNetwork(weight, bias, input, excepted, speed) {
 		delta = output.map((_, j) => weight[i].vTake(j).vMul(error).vSum())
 		error = output.vMul(output.vAs(1).vSub(output)).vMul(delta)
 	}
-	error = excepted.vSub(result[result.length - 1])
+	error = expected.vSub(result[result.length - 1])
 	return error.vMul(error).vSum() / error.length
 }
 
@@ -137,7 +137,7 @@ function makeInput(pts, size) {
 		.reduce((s, c) => s.concat(c.x, c.y), [ ])
 }
 
-function makeExcepted(index, size) {
+function makeExpected(index, size) {
 	var bits = index.toString(2).split('').map(parseFloat)
 	return Array(size).fill(0).concat(bits).slice(-size)
 }
@@ -149,11 +149,11 @@ function getIndex(output, threshold) {
 
 function AnnGestureParser(opts) {
 	this.opts = opts || { }
-	this.opts.sizes 				= this.opts.sizes 				|| [20, 30, 8]
-	this.opts.trainningSpeed 		= this.opts.trainningSpeed 		|| 0.2
-	this.opts.maxTrainnningTimes 	= this.opts.maxTrainnningTimes 	|| 1e4
-	this.opts.minTrainningError 	= this.opts.minTrainningError 	|| 1e-2
-	this.opts.outputThreshold 		= this.opts.outputThreshold 	|| 0.1
+	this.opts.sizes = this.opts.sizes || [20, 30, 8]
+	this.opts.trainingSpeed = this.opts.trainingSpeed || 0.5
+	this.opts.maxTrainingTimes = this.opts.maxTrainingTimes || 1e4
+	this.opts.minTrainingError = this.opts.minTrainingError || 1e-3
+	this.opts.outputThreshold = this.opts.outputThreshold || 0.1
 
 	var sizes = this.opts.sizes
 	this.inputSize = sizes[0]
@@ -168,18 +168,18 @@ function AnnGestureParser(opts) {
 AnnGestureParser.prototype.update = function() {
 	var weight = this.networkWeight,
 		bias = this.networkBias,
-		speed = this.opts.trainningSpeed,
+		speed = this.opts.trainingSpeed,
 		rets = Object.keys(this.trainStore),
 		times = 0, error = 1/0
 
-	while (times ++ < this.opts.maxTrainnningTimes &&
-			error > this.opts.minTrainningError) {
+	while (times ++ < this.opts.maxTrainingTimes &&
+			error > this.opts.minTrainingError) {
 		error = 0
 		rets.forEach(ret => {
 			var store = this.trainStore[ret],
-				excepted = makeExcepted(store.index, this.outputSize)
+				expected = makeExpected(store.index, this.outputSize)
 			store.inputs.forEach(input => {
-				error += adjustNetwork(weight, bias, input, excepted, speed)
+				error += adjustNetwork(weight, bias, input, expected, speed)
 			})
 		})
 	}
@@ -198,8 +198,8 @@ AnnGestureParser.prototype.add = function(pts, ret) {
 	store.inputs.push(input)
 
 	var error = this.update()
-	if (error > this.opts.minTrainningError)
-		console.warn('result does not converge, error', error)
+	if (error > this.opts.minTrainingError)
+		console.warn('the network is not fully trained, error', error)
 
 	return this.test(pts)
 }
