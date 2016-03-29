@@ -1,6 +1,6 @@
 {
   "name": "ann-gesture-parser",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "ANN powered gesture parser",
   "main": "index.js",
   "repository": {
